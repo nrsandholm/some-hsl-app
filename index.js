@@ -1,4 +1,5 @@
 import React from "react";
+import { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import {
   BrowserRouter,
@@ -12,6 +13,32 @@ import "./index.css";
 import { client, getStopsByLocationQuery, getStopByIdQuery } from "./client";
 import { ApolloProvider, useQuery } from "@apollo/client";
 
+const useCoordinates = () => {
+  const [coordinates, setCoordinates] = useState(null);
+
+  if (!navigator.geolocation) {
+    return {
+      error: "Geolocation not supported!",
+    };
+  } else {
+    useEffect(() => {
+      function success(position) {
+        setCoordinates(position.coords);
+      }
+      function error() {
+        setCoordinates({ error: "Something went wrong!" });
+      }
+
+      const id = navigator.geolocation.watchPosition(success, error);
+      return () => {
+        navigator.geolocation.clearWatch(id);
+      };
+    });
+  }
+
+  return coordinates;
+};
+
 const App = () => (
   <ApolloProvider client={client}>
     <BrowserRouter>
@@ -21,7 +48,7 @@ const App = () => (
             <Routes />
           </BrowserRoute>
           <BrowserRoute path="/stops">
-            <Stops />
+            <Coordinates />
           </BrowserRoute>
           <BrowserRoute path="*">
             <Redirect to="/stops" />;
@@ -32,9 +59,22 @@ const App = () => (
   </ApolloProvider>
 );
 
-const Stops = () => {
+const Coordinates = () => {
+  const coordinates = useCoordinates();
+
+  if (coordinates == null) {
+    return <div>Loading...</div>;
+  }
+  if (coordinates.error) {
+    return <div>{coordinates.error}</div>;
+  }
+
+  return <Stops coordinates={coordinates} />;
+};
+
+const Stops = ({ coordinates }) => {
   const { loading, error, data } = useQuery(
-    getStopsByLocationQuery(60.18693365313273, 24.95368673076361, 100)
+    getStopsByLocationQuery(coordinates.latitude, coordinates.longitude, 500)
   );
 
   if (loading) {
