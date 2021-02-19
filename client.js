@@ -1,12 +1,8 @@
-import {
-  ApolloClient,
-  InMemoryCache,
-  gql,
-} from '@apollo/client';
+import { ApolloClient, InMemoryCache, gql } from "@apollo/client";
 
 export const client = new ApolloClient({
-  uri: 'https://api.digitransit.fi/routing/v1/routers/hsl/index/graphql',
-  cache: new InMemoryCache()
+  uri: "https://api.digitransit.fi/routing/v1/routers/hsl/index/graphql",
+  cache: new InMemoryCache(),
 });
 
 export const getStopsByLocationQuery = (lat, lon, radius) => {
@@ -23,10 +19,10 @@ export const getStopsByLocationQuery = (lat, lon, radius) => {
 	    }
 	  }
 	}`;
-}
+};
 
 export const getStopByIdQuery = (id) => {
-	return gql`{
+  return gql`{
     stop (id: "${id}") {
       gtfsId
       name
@@ -37,4 +33,4 @@ export const getStopByIdQuery = (id) => {
       }
     }
 	}`;
-}
+};
